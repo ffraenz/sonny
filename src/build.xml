@@ -1,0 +1,6 @@
+<?xml version="1.0" ?>
+<project name="BuildMain" default="CreateJar">
+  <target name="CreateJar" description="Create Jar file">
+    <jar jarfile="Sonny.jar" basedir="." includes="**/*.class *.yml" />
+  </target>
+</project>

@@ -1,0 +1,328 @@
+
+server:
+  name: "fusel.lu"
+
+bot:
+  name: "Sonny"
+
+translations:
+  - key: "No players online"
+    translations:
+      - "Et ass keen do"
+      - "Kee Spiller online"
+      - "All Pl\u00e4tz si fr\u00e4i"
+      - "Du bass alleng"
+      - "Du bass den \u00e9ischten"
+      - "Mat dir geet et lass"
+      - "Singleplayer Modus fir dech"
+      - "Sturmfrei"
+      - "De Sonny ass do"
+
+  - key: "{player} joined the game"
+    translations:
+      - "{player} ass dem Spill b\u00e4igetrueden"
+      - "{player} ass online"
+      - "{player} ass do"
+      - "Salut {player}!"
+      - "Moien {player}"
+      - "H\u00e4erzlech W\u00ebllkomm, {player}!"
+      - "Hello, Hello, Hello! {player}"
+
+  - key: "{player} left the game"
+    translations:
+      - "{player} huet d'Spill verlooss"
+      - "{player} ass offline"
+      - "{player} ass fort"
+      - "{player} ass gaange"
+      - "\u00c4ddi {player}"
+      - "Bye {player}"
+      - "Bis geschw\u00ebnn, {player}"
+      - "Ab elo ouni {player}"
+
+  - key: "{player} changed to {world}"
+    translations:
+      - "{player} huet {world} betrueden"
+      - "{player} ass an {world} gereest"
+
+  - key: "{player} teleported {to_destination}"
+    translations:
+      - "{player} gouf {to_destination} teleport\u00e9iert"
+      - "{player} gouf {to_destination} gebeamt"
+
+  - key: "Your destination is not available"
+    translations: "Deng Destinatioun ass net verf\u00fcgbar"
+
+  - key: "to home"
+    translations:
+      - "op de Welt Spawn"
+      - "an d'M\u00ebtt vun der Welt"
+      - "op de Nullpunkt"
+
+  - key: "to bed"
+    translations:
+      - "b\u00e4i d'Bett"
+      - "an d'Bett"
+      - "nierft d'Bett"
+      - "\u00ebnnert d'Bett"
+
+  - key: "Unknown skill. Type {help} to get started"
+    translations: "Onbekannt F\u00e4hegkeet. Tipp {help} fir unzef\u00e4nken"
+
+  - key: "{player} went to bed"
+    translations:
+      - "{player} ass schlofe gaang"
+      - "{player} l\u00e4it am Bett"
+      - "{player} huet sech zougedeckt"
+      - "{player} schl\u00e9ift d\u00e9if a fest"
+
+  - key: "{player} left bed"
+    translations:
+      - "{player} ass nees opgestanen"
+      - "{player} kann net schlofen"
+      - "{player} wollt awer net schlofen"
+
+  - key: "{player} died"
+    translations:
+      - "{player} ass gestuerwen"
+      - "{player} huet dat net iwwerlieft"
+      - "Game over, {player}"
+      - "{player} ist tot. Lang lebe {player}!"
+
+  - key: "{player} drowned"
+    translations:
+      - "{player} ass erdronk"
+
+  - key: "{player} burned to death"
+    translations:
+      - "{player} ass verbrannt"
+      - "{player} huet d'Feier net iwwerlieft"
+
+  - key: "{player} flew into a wall"
+    translations:
+      - "{player} ass an eng Mauer geflunn"
+      - "{player} ass ze fest gelant"
+
+  - key: "{player} fell in lava"
+    translations:
+      - "{player} wollt am Lava schwammen"
+      - "{player} ass am Lava \u00ebmkomm"
+
+  - key: "{player} died due to poison"
+    translations:
+      - "{player} huet d\u00ebs Verg\u00ebftung net iwwerlieft"
+
+  - key: "{player} fell from a high place"
+    translations:
+      - "{player} ass ze d\u00e9if gefall"
+      - "{player} ass ze fest opkomm"
+
+  - key: "{player} suffocated"
+    translations:
+      - "{player} ass erst\u00e9ckt"
+
+  - key: "{player} starved to death"
+    translations:
+      - "{player} ass verhongert"
+
+  - key: "{player} has been shot"
+    translations:
+      - "{player} gouf erschoss"
+      - "{player} gouf getraff"
+
+  - key: "{player} has been shot by {entity}"
+    translations:
+      - "{entity} huet {player} erschoss"
+      - "{entity} huet {player} getraff"
+
+  - key: "{player} has been killed by {entity}"
+    translations:
+      - "{entity} huet {player} embruecht"
+
+  - key: "{player} killed {count} {unit} so far"
+    translations:
+      - "{player} huet bis elo {count} {unit} embruecht"
+      - "{count} {unit} huet {player} bis elo embruecht"
+
+  - key: "{player} died {count} {unit} so far"
+    translations:
+      - "{player} ass bis elo {count} {unit} gestuewen"
+      - "{count} {unit} ass {player} bis elo gestuewen"
+
+  - key: "{player} played for {count} {unit} so far"
+    translations:
+      - "{player} huet bis elo {count} {unit} gespillt"
+      - "Bis elo war {player} {count} {unit} online"
+
+  - key: "{player} walked {count} {unit} so far"
+    translations: "{player} ass bis elo {count} {unit} w\u00e4it gelaaf"
+
+  - key: "{player} jumped {count} {unit} so far"
+    translations: "{player} ass bis elo {count} {unit} gesprongen"
+
+  - key: "hour"
+    translations: "Stonn"
+
+  - key: "hours"
+    translations: "Stonnen"
+
+  - key: "time"
+    translations: "mol"
+
+  - key: "times"
+    translations: "mol"
+
+  - key: "meter"
+    translations: "Meter"
+
+  - key: "meters"
+    translations: "Meter"
+
+  - key: "mob"
+    translations: "Monster"
+
+  - key: "mobs"
+    translations: "Monster"
+
+  - key: "fellow player"
+    translations: "Matspiller"
+
+  - key: "fellow players"
+    translations: "Matspiller"
+
+  - key: "world_world"
+    translations:
+      - "d'Oberwelt"
+
+  - key: "world_world_nether"
+    translations:
+      - "den Nether"
+
+  - key: "world_world_the_end"
+    translations:
+      - "d'Enn"
+
+  - key: "entity_OTHER"
+    translations:
+      - "e Monster"
+
+  - key: "entity_BLAZE"
+    translations:
+      - "e Blaze"
+
+  - key: "entity_CAVE_SPIDER"
+    translations:
+      - "eng g\u00ebfteg Spann"
+      - "eng kleng Spann"
+
+  - key: "entity_CHICKEN"
+    translations:
+      - "een Hung"
+      - "en Hunn"
+
+  - key: "entity_COW"
+    translations:
+      - "eng Kou"
+
+  - key: "entity_CREEPER"
+    translations:
+      - "ee Creeper"
+
+  - key: "entity_DROWNED"
+    translations:
+      - "eng Waasserl\u00e4ich"
+
+  - key: "entity_ENDERMAN"
+    translations:
+      - "een Enderman"
+
+  - key: "entity_ENDER_DRAGON"
+    translations:
+      - "een Draach"
+
+  - key: "entity_GHAST"
+    translations:
+      - "een Ghast"
+
+  - key: "entity_IRON_GOLEM"
+    translations:
+      - "een Eisegolem"
+
+  - key: "entity_HUSK"
+    translations:
+      - "een Husk"
+
+  - key: "entity_PILLAGER"
+    translations:
+      - "e Pillager"
+
+  - key: "entity_PHANTOM"
+    translations:
+      - "e Phantom"
+
+  - key: "entity_PIG"
+    translations:
+      - "e Schw\u00e4in"
+
+  - key: "entity_PIG_ZOMBIE"
+    translations:
+      - "e Schw\u00e4inzombie"
+
+  - key: "entity_SILVERFISH"
+    translations:
+      - "e Selwerf\u00ebsch"
+
+  - key: "entity_SKELETON"
+    translations:
+      - "e Skelett"
+
+  - key: "entity_SKELETON_HORSE"
+    translations:
+      - "e Skelett um P\u00e4erd"
+
+  - key: "entity_SPIDER"
+    translations:
+      - "eng Spann"
+
+  - key: "entity_SHEEP"
+    translations:
+      - "een Schof"
+
+  - key: "entity_SHULKER"
+    translations:
+      - "een Shulker"
+
+  - key: "entity_SLIME"
+    translations:
+      - "e Slime"
+
+  - key: "entity_WITCH"
+    translations:
+      - "eng Hex"
+
+  - key: "entity_WITCH"
+    translations:
+      - "eng Hex"
+
+  - key: "entity_WITHER"
+    translations:
+      - "e Wither"
+
+  - key: "entity_WITHER_SKELETON"
+    translations:
+      - "e Witherskelett"
+
+  - key: "entity_WOLF"
+    translations:
+      - "e Wollef"
+
+  - key: "entity_ZOMBIE"
+    translations:
+      - "een Zombie"
+
+  - key: "entity_ZOMBIE_HORSE"
+    translations:
+      - "een Zombie um P\u00e4erd"
+
+  - key: "entity_ZOMBIE_VILLAGER"
+    translations:
+      - "een Zombie Bierger"
