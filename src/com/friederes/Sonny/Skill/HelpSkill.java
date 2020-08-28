@@ -4,20 +4,13 @@ package com.friederes.Sonny.Skill;
 import com.friederes.Sonny.Bot;
 import org.bukkit.entity.Player;
 
-public class HelpSkill
-  implements CommandSkill
+public class HelpSkill extends Skill implements CommandSkill
 {
-  public Bot bot;
-
-  /**
-   * Constructor
-   * @param bot Bot instance
-   */
   public HelpSkill(Bot bot) {
-    this.bot = bot;
-  }
+		super(bot);
+	}
 
-  /**
+	/**
    * Test wether this command matches the given args.
    * @param sender Sender
    * @param args Command arguments
@@ -41,7 +34,8 @@ public class HelpSkill
         "Use {bed} to get back to your bed. That's all I know.",
         new Object[] {
             "/sonny home",
-            "/sonny bed"
+            "/sonny bed",
+            "/sonny secure"
         }
       );
     } else {

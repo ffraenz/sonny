@@ -9,20 +9,13 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerTeleportEvent;
 
-public class TeleportSkill
-  implements CommandSkill
+public class TeleportSkill extends Skill implements CommandSkill
 {
-  public Bot bot;
-
-  /**
-   * Constructor
-   * @param bot Bot instance
-   */
   public TeleportSkill(Bot bot) {
-    this.bot = bot;
-  }
+		super(bot);
+	}
 
-  /**
+	/**
    * Test wether this command matches the given args.
    * @param sender Sender
    * @param args Command arguments

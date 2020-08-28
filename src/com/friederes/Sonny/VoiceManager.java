@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.bukkit.ChatColor;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Entity;
@@ -104,6 +105,10 @@ public class VoiceManager
       if (object instanceof String) {
         // Describe String argument
         description = translate((String)object, receiver);
+      } else if (object instanceof Location) {
+      	// Describe Location argument
+      	Location location = (Location)object;
+      	description = String.format("(%d,%d,%d)", location.getBlockX(), location.getBlockY(), location.getBlockZ());
       } else if (object instanceof Player) {
         // Describe Player argument
         Player player = (Player)object;
@@ -146,11 +151,14 @@ public class VoiceManager
       // Fulfill placeholder in message
       if (description != null) {
         message = message.replaceAll(
-          String.format("\\{%s\\}", new Object[] { placeholder }),
+          String.format("\\{%s\\}", placeholder),
           String.valueOf(this.botColor) + description + ChatColor.RESET
         );
       }
     }
+    
+    // Uppercase first letter of the message
+    // message = message.substring(0, 1).toUpperCase() + message.substring(1);
 
     // Inject bot name following the chat format
     message = String.format(

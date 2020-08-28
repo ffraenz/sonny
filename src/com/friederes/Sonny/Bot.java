@@ -1,10 +1,8 @@
 
 package com.friederes.Sonny;
 
-import com.friederes.Sonny.Skill.HelpSkill;
-import com.friederes.Sonny.Skill.RandomStatsSkill;
-import com.friederes.Sonny.Skill.Skill;
-import com.friederes.Sonny.Skill.TeleportSkill;
+import com.friederes.Sonny.Skill.*;
+
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -39,8 +37,10 @@ public class Bot
 
     Skill[] skills = {
       (Skill)new TeleportSkill(this),
-      (Skill)new HelpSkill(this),
-      (Skill)new RandomStatsSkill(this)
+      (Skill)new ProtectSkill(this),
+      (Skill)new RandomStatsSkill(this),
+      (Skill)new BedSkill(this),
+      (Skill)new HelpSkill(this)
     };
 
     this.skillManager = new SkillManager(this, skills);
@@ -67,6 +67,10 @@ public class Bot
    */
   public SonnyPlugin getPlugin() {
     return this.plugin;
+  }
+  
+  public PluginManager getPluginManager() {
+  	return this.pluginManager;
   }
 
   /**

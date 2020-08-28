@@ -1,7 +1,7 @@
 
 package com.friederes.Sonny.Skill;
 
-public interface ProactiveSkill extends Skill {
+public interface ProactiveSkill {
   /**
    * Returns the chance (1/n) of this proactive skill to occur.
    * @return Chance value

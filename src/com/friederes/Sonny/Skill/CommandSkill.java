@@ -3,7 +3,7 @@ package com.friederes.Sonny.Skill;
 
 import org.bukkit.entity.Player;
 
-public interface CommandSkill extends Skill {
+public interface CommandSkill {
   /**
    * Test wether this command matches the given args.
    * @param sender Sender

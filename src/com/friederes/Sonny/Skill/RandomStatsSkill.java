@@ -5,9 +5,8 @@ import com.friederes.Sonny.Bot;
 import org.bukkit.Statistic;
 import org.bukkit.entity.Player;
 
-public class RandomStatsSkill
-  implements ProactiveSkill
-{
+public class RandomStatsSkill extends Skill implements ProactiveSkill
+{ 
   protected String[] statsPool = new String[] {
     "mob_kills",
     "player_kills",
@@ -17,15 +16,9 @@ public class RandomStatsSkill
     "jumps"
   };
 
-  public Bot bot;
-
-  /**
-   * Constructor
-   * @param bot Bot instance
-   */
   public RandomStatsSkill(Bot bot) {
-    this.bot = bot;
-  }
+		super(bot);
+	}
 
   /**
    * Returns the chance (1/n) of this proactive skill to occur.
@@ -36,7 +29,7 @@ public class RandomStatsSkill
       return 0;
     }
 
-    return 32;
+    return 24;
   }
 
   /**

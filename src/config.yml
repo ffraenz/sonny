@@ -81,6 +81,22 @@ translations:
       - "{player} kann net schlofen"
       - "{player} wollt awer net schlofen"
 
+  - key: "Your current location is {protected} by the block at {location}"
+    translations:
+      - "Deng Positioun ass {protected} vum Block b\u00e4i {location}"
+
+  - key: "Your current location is {protected}"
+    translations:
+      - "Deng Positioun ass {protected}"
+
+  - key: "protected"
+    translations:
+      - "gesechert"
+      
+  - key: "not protected"
+    translations:
+      - "net gesechert"
+
   - key: "{player} died"
     translations:
       - "{player} ass gestuerwen"

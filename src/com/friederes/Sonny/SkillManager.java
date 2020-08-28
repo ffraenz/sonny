@@ -6,6 +6,8 @@ import com.friederes.Sonny.Skill.ProactiveSkill;
 import com.friederes.Sonny.Skill.Skill;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.HandlerList;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -25,6 +27,33 @@ public class SkillManager
   public SkillManager(Bot bot, Skill[] skills) {
     this.bot = bot;
     this.skills = skills;
+    
+    // Enable skills initially
+    for (Skill skill : skills) {
+    	enableSkill(skill);
+    }
+  }
+  
+  public void enableSkill(Skill skill) {
+  	skill.enable();
+  	
+  	// Register events
+  	if (skill instanceof Listener) {
+      this.bot.getPluginManager().registerEvents((Listener)skill, (Plugin)this.bot.getPlugin());
+  	}
+  	
+  	System.out.println(String.format("[SonnyPlugin] Skill %s enabled.", skill.getClass().getSimpleName()));
+  }
+  
+  public void disableSkill(Skill skill) {
+  	// Unregister events
+  	if (skill instanceof Listener) {
+  		HandlerList.unregisterAll((Listener)skill);
+  	}
+
+  	skill.disable();
+
+  	System.out.println(String.format("[SonnyPlugin] Skill %s disabled.", skill.getClass().getSimpleName()));
   }
 
   /**
@@ -43,14 +72,12 @@ public class SkillManager
 
     // Find matching skill
     CommandSkill skill = null;
-    int i = 0;
-    while (skill == null && i < this.skills.length) {
+    int i = -1;
+    while (skill == null && ++i < this.skills.length) {
       if (this.skills[i] instanceof CommandSkill && (
         (CommandSkill)this.skills[i]).test(senderPlayer, args)) {
         skill = (CommandSkill)this.skills[i];
       }
-
-      i++;
     }
 
     // Execute skill, if any
