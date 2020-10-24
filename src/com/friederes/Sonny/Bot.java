@@ -6,14 +6,12 @@ import com.friederes.Sonny.Skill.*;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
 public class Bot
 {
   protected SonnyPlugin plugin;
   protected PluginManager pluginManager;
-  protected SensorManager sensorManager;
   protected ChatManager chatManager;
   protected SkillManager skillManager;
   protected VoiceManager voiceManager;
@@ -31,22 +29,24 @@ public class Bot
    */
   public void init() {
     this.pluginManager = this.plugin.getServer().getPluginManager();
-    this.pluginManager.registerEvents(getSensorManager(), (Plugin)this.plugin);
 
     getVoiceManager().configure(this.plugin.getConfig());
 
     Skill[] skills = {
       (Skill)new TeleportSkill(this),
-      (Skill)new ProtectSkill(this),
       (Skill)new RandomStatsSkill(this),
       (Skill)new BedSkill(this),
+      (Skill)new ChatSkill(this),
+      (Skill)new MotdSkill(this),
+      (Skill)new NarratorSkill(this),
+      (Skill)new ProtectSkill(this),
       (Skill)new HelpSkill(this)
     };
 
     this.skillManager = new SkillManager(this, skills);
     System.out.println(String.format("[SonnyPlugin] %d skills activated.", new Object[] { Integer.valueOf(skills.length) }));
 
-    this.plugin.getCommand("sonny").setExecutor(getSensorManager());
+    this.plugin.getCommand("sonny").setExecutor(getSkillManager());
 
     for (Player player : getServer().getOnlinePlayers()) {
       getChatManager().allocatePlayerChatColor(player);
@@ -85,16 +85,6 @@ public class Bot
    */
   public SkillManager getSkillManager() {
     return this.skillManager;
-  }
-
-  /**
-   * Returns the sensor manager instance
-   */
-  public SensorManager getSensorManager() {
-    if (this.sensorManager == null) {
-      this.sensorManager = new SensorManager(this);
-    }
-    return this.sensorManager;
   }
 
   /**
@@ -142,7 +132,6 @@ public class Bot
 
     // Set daytime
     long relativeTime = 24000 - world.getTime();
-    System.out.println(world.getFullTime());
     world.setFullTime(world.getFullTime() + relativeTime);
   }
 }

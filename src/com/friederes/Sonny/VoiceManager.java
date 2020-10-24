@@ -221,35 +221,6 @@ public class VoiceManager
   }
 
   /**
-   * Composes the server Motd.
-   * @return Server motd
-   */
-  public String composeMotd() {
-    String message = ChatColor.GRAY + this.serverName;
-    String separator = ChatColor.GRAY + " ◆ ";
-
-    Object[] players = this.bot.getServer().getOnlinePlayers().toArray();
-    if (players.length > 0) {
-      // Players online
-      for (int i = 0; i < players.length; i++) {
-        Player player = (Player)players[i];
-        message +=
-          separator +
-          this.bot.getChatManager().getPlayerChatColor(player) +
-          player.getName();
-      }
-    } else {
-      // No players online
-      message +=
-        separator +
-        ChatColor.RESET +
-        translate("No players online", null);
-    }
-
-    return message;
-  }
-
-  /**
    * Translates a string for the given player.
    * @param string String to be translated
    * @param player Player the string is being translated for (optional)

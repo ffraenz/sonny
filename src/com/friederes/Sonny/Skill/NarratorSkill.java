@@ -1,35 +1,20 @@
 
-package com.friederes.Sonny;
+package com.friederes.Sonny.Skill;
 
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.event.server.ServerListPingEvent;
 
-public class SensorManager
-  implements Listener, CommandExecutor
-{
-  public Bot bot;
+import com.friederes.Sonny.Bot;
 
-  /**
-   * Constructor
-   * @param bot Bot instance
-   */
-  public SensorManager(Bot bot) {
-    this.bot = bot;
-  }
+public class NarratorSkill extends Skill implements Listener {
 
-  @EventHandler
-  public void onServerListPing(ServerListPingEvent event) {
-    event.setMotd(this.bot.getVoiceManager().composeMotd());
-  }
+	public NarratorSkill(Bot bot) {
+		super(bot);
+	}
 
   @EventHandler
   public void onPlayerJoin(PlayerJoinEvent event) {
@@ -56,19 +41,5 @@ public class SensorManager
     if (bot.isMultiplayer()) {
       this.bot.getVoiceManager().say("{player} changed to {world}", event.getPlayer(), event.getPlayer().getWorld());
     }
-  }
-
-  @EventHandler
-  public void onPlayerChat(AsyncPlayerChatEvent event) {
-    event.setFormat(this.bot.getChatManager().getChatFormat(event.getPlayer()));
-  }
-
-  public boolean onCommand(
-    CommandSender sender,
-    Command cmd,
-    String label,
-    String[] args
-  ) {
-    return this.bot.getSkillManager().handleCommand(sender, args);
   }
 }

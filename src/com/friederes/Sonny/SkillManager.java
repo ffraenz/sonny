@@ -4,6 +4,9 @@ package com.friederes.Sonny;
 import com.friederes.Sonny.Skill.CommandSkill;
 import com.friederes.Sonny.Skill.ProactiveSkill;
 import com.friederes.Sonny.Skill.Skill;
+
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -11,7 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-public class SkillManager
+public class SkillManager implements CommandExecutor
 {
   protected Bot bot;
   public Skill[] skills;
@@ -59,10 +62,17 @@ public class SkillManager
   /**
    * Handles an incoming command.
    * @param sender Command sender
+   * @param cmd
+   * @param label
    * @param args Command arguments
    * @return True, if command was successful
    */
-  public boolean handleCommand(CommandSender sender, String[] args) {
+  public boolean onCommand(
+    CommandSender sender,
+    Command cmd,
+    String label,
+    String[] args
+  ) {
     // Handle non-player command senders
     if (!(sender instanceof Player)) {
       sender.sendMessage("I can only respond to players");

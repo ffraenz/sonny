@@ -25,46 +25,85 @@ import com.friederes.Sonny.Bot;
 
 public class ProtectSkill extends Skill implements Listener, CommandSkill
 {
-	protected Map<Chunk,ArrayList<Block>> chunkProtectBlocks;
+	protected Map<String,ArrayList<Location>> chunkProtectLocations;
 	protected Material protectionBlockType = Material.LAPIS_BLOCK;
+	
+	protected int protectRadius = 16;
 	
   public ProtectSkill(Bot bot) {
 		super(bot);
 	}
   
-  public ArrayList<Block> getAndCreateProtectBlocksForChunk(Chunk chunk) {
-  	ArrayList<Block> protectBlocks = chunkProtectBlocks.get(chunk);
-		if (protectBlocks == null) {
-			protectBlocks = new ArrayList<Block>();
-			chunkProtectBlocks.put(chunk, protectBlocks);
-		}
-		return protectBlocks;
+  public ArrayList<Location> getOrCreateProtectLocationsForChunk(Chunk chunk, boolean create) {
+  	return getOrCreateProtectLocationsForChunk(chunk.getX(), chunk.getZ(), create);
   }
   
-  public Block getProtectBlockAt(Location location) {
-  	// Retrieve protect blocks in location chunk
-  	ArrayList<Block> protectBlocks = chunkProtectBlocks.get(location.getChunk());
-  	if (protectBlocks == null) {
-  		return null;
-  	}
-  	
-  	// Lookup protect block around spawn Y
-  	int spawnY = location.getBlockY();
-  	int i = -1;
-  	int y;
-  	Block protectBlock = null;
-  	
-  	while (protectBlock == null && ++i < protectBlocks.size()) {
-  		y = protectBlocks.get(i).getY();
-  		if (spawnY >= y - 8 && spawnY < y + 8) {
-  			protectBlock = protectBlocks.get(i);
-  		}
-  	}
-  	
-  	return protectBlock;
+  public ArrayList<Location> getOrCreateProtectLocationsForChunk(int x, int z, boolean create) {
+  	String key = String.format("%d;%d", x, z);
+  	ArrayList<Location> protectLocations = chunkProtectLocations.get(key);
+		if (create && protectLocations == null) {
+			protectLocations = new ArrayList<Location>();
+			chunkProtectLocations.put(key, protectLocations);
+		}
+		return protectLocations;
   }
 
+  /**
+   * Find a protect block location next to the given location, if it is protected.
+   */
+  public Location getProtectLocationNear(Location location) {
+  	// Lookup protect block around spawn Y
+  	int chunkX = location.getChunk().getX();
+  	int chunkZ = location.getChunk().getZ();
+  	int i, relX, relZ;
+  	
+  	Location protectLocation = null;
+  	ArrayList<Location> protectLocations;
+
+  	int chunkRadius = (int) Math.ceil(protectRadius / 16.0);
+  	
+  	relX = -chunkRadius - 1;
+  	while (protectLocation == null && ++relX <= chunkRadius) {
+  		relZ = -chunkRadius - 1;
+  		while (protectLocation == null && ++relZ <= chunkRadius) {
+  			// Retrieve protect blocks for this chunk
+  	  	protectLocations = getOrCreateProtectLocationsForChunk(chunkX + relX, chunkZ + relZ, false);
+  	  	i = -1;
+  			while (protectLocation == null && protectLocations != null && ++i < protectLocations.size()) {
+  				// Check if this protect block is in range
+  	  		if (isLocationWithinSquare(location, protectLocations.get(i), protectRadius)) {
+  	  			protectLocation = protectLocations.get(i);
+  	  		}
+  	  	}
+    	}
+  	}
+  	
+  	return protectLocation;
+  }
+  
+  /**
+   * Check wether a given location is inside a square around another location.
+   */
+  public boolean isLocationWithinSquare(Location location, Location squareCenter, int squareRadius) {
+  	return (
+  			Math.abs(location.getBlockX() - squareCenter.getBlockX()) <= squareRadius &&
+  			Math.abs(location.getBlockZ() - squareCenter.getBlockZ()) <= squareRadius &&
+  			Math.abs(location.getBlockY() - squareCenter.getBlockY()) <= squareRadius
+  	);
+  }
+
+  /**
+   * Scan chunk for protected locations.
+   */
 	public void scanChunk(Chunk chunk) {
+		// Skip chunk, if already scanned
+		if (getOrCreateProtectLocationsForChunk(chunk, false) != null) {
+			return;
+		}
+		
+		// Add chunk to hash table
+		getOrCreateProtectLocationsForChunk(chunk, true);
+		
 		// Iterate through all blocks inside chunk and scan them
 		int maxHeight = chunk.getWorld().getMaxHeight();
 		for (int x = 0; x < 16; x++) {
@@ -75,25 +114,33 @@ public class ProtectSkill extends Skill implements Listener, CommandSkill
 			}
 		}
 	}
-  
+
+  /**
+   * Determine wether a given block ensures protection.
+   */
   public boolean scanBlock(Block block) {
 		if (block.getType() == this.protectionBlockType) {
-			this.getAndCreateProtectBlocksForChunk(block.getChunk()).add(block);
+			getOrCreateProtectLocationsForChunk(block.getChunk(), true)
+				.add(block.getLocation().clone());
 			return true;
 		}
 		return false;
   }
 
-	public void removeChunk(Chunk chunk) {
-		chunkProtectBlocks.remove(chunk);
-	}
-	
+  /**
+   * Remove the given block as a protected location.
+   */
 	public boolean removeBlock(Block block) {
-		ArrayList<Block> protectBlocks = chunkProtectBlocks.get(block.getChunk());
-		if (protectBlocks != null) {
-			int i = protectBlocks.indexOf(block);
-			if (i != -1) {
-				protectBlocks.remove(i);
+		Location location = block.getLocation();
+		ArrayList<Location> protectLocations = getOrCreateProtectLocationsForChunk(block.getChunk(), false);
+		if (protectLocations != null) {
+			int index = -1;
+			boolean found = false;
+			while (!found && ++index < protectLocations.size()) {
+				found = protectLocations.get(index).distance(location) == 0.0;
+			}
+			if (found) {
+				protectLocations.remove(index);
 				return true;
 			}
   	}
@@ -103,7 +150,7 @@ public class ProtectSkill extends Skill implements Listener, CommandSkill
 	@Override
 	public void enable() {
 		// Prepare hash map
-		chunkProtectBlocks = new HashMap<>();
+		chunkProtectLocations = new HashMap<>();
 		
 		// Scan loaded chunks
 		for (World world : bot.getServer().getWorlds()) {
@@ -115,52 +162,34 @@ public class ProtectSkill extends Skill implements Listener, CommandSkill
 
 	@Override
 	public void disable() {
-		chunkProtectBlocks = null;
+		chunkProtectLocations = null;
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onEntitySpawn(CreatureSpawnEvent event) {
 		// Is hostile
 		if (event.getEntity() instanceof Monster) {
-			if (getProtectBlockAt(event.getLocation()) != null) {
+			if (getProtectLocationNear(event.getLocation()) != null) {
 				event.setCancelled(true);
-				System.out.println("Cancelled spawn event");
 			}
 		}
 	}
 
-	@Override
-	public boolean test(Player player, String[] args) {
-		return (args.length == 1 && args[0].matches("^(secure|secured|protect|protected|secher)$"));
-	}
-
-	@Override
-	public boolean execute(Player player, String[] args) {
-		Block protectBlock = getProtectBlockAt(player.getLocation());
-		if (protectBlock != null) {
-			this.bot.getVoiceManager().whisper(
-	      player,
-	      "Your current location is {protected} by the block at {location}",
-	      new Object[] { "protected", protectBlock.getLocation() }
-	    );
-		} else {
-			this.bot.getVoiceManager().whisper(
-	      player,
-	      "Your current location is {protected}",
-	      new Object[] { "not protected" }
-	    );
-		}
-		return true;
-	}
-
 	@EventHandler
 	public void onChunkLoad(ChunkLoadEvent event) {
-		scanChunk(event.getChunk());
+		// Scan old chunks async for protect blocks
+		if (!event.isNewChunk()) {
+			this.bot.getServer().getScheduler().runTaskAsynchronously(this.bot.getPlugin(), new Runnable() {
+				public void run() {
+					scanChunk(event.getChunk());
+				}
+			});
+		}
 	}
 
 	@EventHandler
 	public void onChunkUnload(ChunkUnloadEvent event) {
-		removeChunk(event.getChunk());
+		// Keep protection blocks of unloaded chunks in memory
 	}
 
 	@EventHandler
@@ -187,5 +216,29 @@ public class ProtectSkill extends Skill implements Listener, CommandSkill
 	      1.0F
 	    );
 		}
+	}
+
+	@Override
+	public boolean test(Player player, String[] args) {
+		return (args.length == 1 && args[0].matches("^(secure|secured|protect|protected|secher)$"));
+	}
+
+	@Override
+	public boolean execute(Player player, String[] args) {
+		Location protectLocation = getProtectLocationNear(player.getLocation());
+		if (protectLocation != null) {
+			this.bot.getVoiceManager().whisper(
+	      player,
+	      "Your current location is {protected} by the block at {location}",
+	      new Object[] { "protected", protectLocation }
+	    );
+		} else {
+			this.bot.getVoiceManager().whisper(
+	      player,
+	      "Your current location is {protected}",
+	      new Object[] { "not protected" }
+	    );
+		}
+		return true;
 	}
 }
