@@ -9,7 +9,6 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Monster;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -18,183 +17,172 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.entity.CreatureSpawnEvent;
-import org.bukkit.event.world.ChunkLoadEvent;
-import org.bukkit.event.world.ChunkUnloadEvent;
 
 import com.friederes.Sonny.Bot;
 
 public class ProtectSkill extends Skill implements Listener, CommandSkill
 {
-	protected Map<String,ArrayList<Location>> chunkProtectLocations;
+	protected Map<String,ArrayList<Location>> chunkProtectionSources;
 	protected Material protectionBlockType = Material.LAPIS_BLOCK;
-	
 	protected int protectRadius = 16;
 	
+	/**
+	 * Constructor
+	 * @param bot
+	 */
   public ProtectSkill(Bot bot) {
 		super(bot);
 	}
   
-  public ArrayList<Location> getOrCreateProtectLocationsForChunk(Chunk chunk, boolean create) {
-  	return getOrCreateProtectLocationsForChunk(chunk.getX(), chunk.getZ(), create);
+  /**
+   * Check wether the given location is a protection source.
+   * @param location Location to be checked
+   * @return True, if it is a protection source
+   */
+  public boolean isProtectionSource(Location location) {
+  	return location.getBlock().getType() == this.protectionBlockType;
   }
-  
-  public ArrayList<Location> getOrCreateProtectLocationsForChunk(int x, int z, boolean create) {
-  	String key = String.format("%d;%d", x, z);
-  	ArrayList<Location> protectLocations = chunkProtectLocations.get(key);
-		if (create && protectLocations == null) {
+
+  /**
+   * Return known protection sources in the given chunk.
+   * Lazily scans the chunk, if not already done, yet.
+   * @param chunk
+   * @return Array of protection source locations
+   */
+  public ArrayList<Location> getChunkProtectionSources(Chunk chunk) {
+  	String key = String.format("%s-%d;%d", chunk.getWorld().getName(), chunk.getX(), chunk.getZ());
+  	ArrayList<Location> protectLocations = chunkProtectionSources.get(key);
+		if (protectLocations == null) {
+			// Create location list for chunk
 			protectLocations = new ArrayList<Location>();
-			chunkProtectLocations.put(key, protectLocations);
+			chunkProtectionSources.put(key, protectLocations);
+			
+			// Iterate through all blocks inside chunk checking for protect locations
+			Location blockLocation;
+			int maxHeight = chunk.getWorld().getMaxHeight();
+			for (int x = 0; x < 16; x++) {
+				for (int z = 0; z < 16; z++) {
+					for (int y = 0; y < maxHeight; y++) {
+						blockLocation = chunk.getBlock(x, y, z).getLocation();
+						if (isProtectionSource(blockLocation)) {
+							protectLocations.add(blockLocation.clone());
+						}
+					}
+				}
+			}
 		}
 		return protectLocations;
   }
 
   /**
-   * Find a protect block location next to the given location, if it is protected.
+   * Update a protection source at the given location.
+   * @return True, if protection source has been altered at the given location
    */
-  public Location getProtectLocationNear(Location location) {
-  	// Lookup protect block around spawn Y
-  	int chunkX = location.getChunk().getX();
-  	int chunkZ = location.getChunk().getZ();
-  	int i, relX, relZ;
-  	
-  	Location protectLocation = null;
-  	ArrayList<Location> protectLocations;
-
-  	int chunkRadius = (int) Math.ceil(protectRadius / 16.0);
-  	
-  	relX = -chunkRadius - 1;
-  	while (protectLocation == null && ++relX <= chunkRadius) {
-  		relZ = -chunkRadius - 1;
-  		while (protectLocation == null && ++relZ <= chunkRadius) {
-  			// Retrieve protect blocks for this chunk
-  	  	protectLocations = getOrCreateProtectLocationsForChunk(chunkX + relX, chunkZ + relZ, false);
-  	  	i = -1;
-  			while (protectLocation == null && protectLocations != null && ++i < protectLocations.size()) {
-  				// Check if this protect block is in range
-  	  		if (isLocationWithinSquare(location, protectLocations.get(i), protectRadius)) {
-  	  			protectLocation = protectLocations.get(i);
-  	  		}
-  	  	}
-    	}
-  	}
-  	
-  	return protectLocation;
-  }
-  
-  /**
-   * Check wether a given location is inside a square around another location.
-   */
-  public boolean isLocationWithinSquare(Location location, Location squareCenter, int squareRadius) {
-  	return (
-  			Math.abs(location.getBlockX() - squareCenter.getBlockX()) <= squareRadius &&
-  			Math.abs(location.getBlockZ() - squareCenter.getBlockZ()) <= squareRadius &&
-  			Math.abs(location.getBlockY() - squareCenter.getBlockY()) <= squareRadius
-  	);
-  }
-
-  /**
-   * Scan chunk for protected locations.
-   */
-	public void scanChunk(Chunk chunk) {
-		// Skip chunk, if already scanned
-		if (getOrCreateProtectLocationsForChunk(chunk, false) != null) {
-			return;
+  public boolean updateProtectionSource(Location location) {
+  	// Search for existing protection sources inside the same chunk
+		ArrayList<Location> protectionSources = getChunkProtectionSources(location.getChunk());
+		int index = -1;
+		boolean found = false;
+		while (!found && ++index < protectionSources.size()) {
+			found = protectionSources.get(index).distance(location) == 0.0;
 		}
-		
-		// Add chunk to hash table
-		getOrCreateProtectLocationsForChunk(chunk, true);
-		
-		// Iterate through all blocks inside chunk and scan them
-		int maxHeight = chunk.getWorld().getMaxHeight();
-		for (int x = 0; x < 16; x++) {
-			for (int z = 0; z < 16; z++) {
-				for (int y = 0; y < maxHeight; y++) {
-					this.scanBlock(chunk.getBlock(x, y, z));
-				}
-			}
-		}
-	}
 
-  /**
-   * Determine wether a given block ensures protection.
-   */
-  public boolean scanBlock(Block block) {
-		if (block.getType() == this.protectionBlockType) {
-			getOrCreateProtectLocationsForChunk(block.getChunk(), true)
-				.add(block.getLocation().clone());
+		// Either add or remove protection source for the given location
+  	boolean protectionSource = isProtectionSource(location);  	
+		if (found && !protectionSource) {
+			// Remove protection source
+			protectionSources.remove(index);
+			return true;
+		} else if (!found && protectionSource) {
+			// Add protection source
+			protectionSources.add(location);
 			return true;
 		}
 		return false;
   }
 
   /**
-   * Remove the given block as a protected location.
+   * Find a protection source next to the given location, if it is protected.
+   * @param location
+   * @return Protection source location, if protected
    */
-	public boolean removeBlock(Block block) {
-		Location location = block.getLocation();
-		ArrayList<Location> protectLocations = getOrCreateProtectLocationsForChunk(block.getChunk(), false);
-		if (protectLocations != null) {
-			int index = -1;
-			boolean found = false;
-			while (!found && ++index < protectLocations.size()) {
-				found = protectLocations.get(index).distance(location) == 0.0;
-			}
-			if (found) {
-				protectLocations.remove(index);
-				return true;
-			}
+  public Location getProtectionSourceNear(Location location) {
+  	// Lookup protect block around spawn Y
+  	int chunkX = location.getChunk().getX();
+  	int chunkZ = location.getChunk().getZ();
+  	int i, relX, relZ;
+  	
+  	Location protectionSource = null;
+  	ArrayList<Location> protectionSources;
+
+  	int chunkRadius = (int) Math.ceil(protectRadius / 16.0);
+  	Chunk chunk;
+  	
+  	relX = -chunkRadius - 1;
+  	while (protectionSource == null && ++relX <= chunkRadius) {
+  		relZ = -chunkRadius - 1;
+  		while (protectionSource == null && ++relZ <= chunkRadius) {
+  			// Retrieve protect blocks for this chunk
+  			chunk = location.getWorld().getChunkAt(chunkX + relX, chunkZ + relZ);
+  	  	protectionSources = getChunkProtectionSources(chunk);
+  	  	i = -1;
+  			while (protectionSource == null && ++i < protectionSources.size()) {
+  				// Check if this protect block is in range
+  	  		if (isLocationWithinProtectionSourceRange(location, protectionSources.get(i))) {
+  	  			protectionSource = protectionSources.get(i);
+  	  		}
+  	  	}
+    	}
   	}
-		return false;
-	}
+  	
+  	return protectionSource;
+  }
+  
+  /**
+   * Check wether a given location is inside a square around another location.
+   * @param location
+   * @param squareCenter
+   * @return True, if the given location is within range
+   */
+  public boolean isLocationWithinProtectionSourceRange(Location location, Location squareCenter) {
+  	return (
+  			Math.abs(location.getBlockX() - squareCenter.getBlockX()) <= protectRadius &&
+  			Math.abs(location.getBlockZ() - squareCenter.getBlockZ()) <= protectRadius &&
+  			Math.abs(location.getBlockY() - squareCenter.getBlockY()) <= protectRadius
+  	);
+  }
   
 	@Override
 	public void enable() {
 		// Prepare hash map
-		chunkProtectLocations = new HashMap<>();
+		chunkProtectionSources = new HashMap<>();
 		
-		// Scan loaded chunks
+		// Scan loaded chunks in advance
 		for (World world : bot.getServer().getWorlds()) {
 			for (Chunk chunk : world.getLoadedChunks()) {
-				scanChunk(chunk);
+				getChunkProtectionSources(chunk);
 			}
 		}
 	}
 
 	@Override
 	public void disable() {
-		chunkProtectLocations = null;
+		chunkProtectionSources = null;
 	}
 	
 	@EventHandler(priority = EventPriority.HIGH)
 	public void onEntitySpawn(CreatureSpawnEvent event) {
 		// Is hostile
 		if (event.getEntity() instanceof Monster) {
-			if (getProtectLocationNear(event.getLocation()) != null) {
+			if (getProtectionSourceNear(event.getLocation()) != null) {
 				event.setCancelled(true);
 			}
 		}
 	}
 
 	@EventHandler
-	public void onChunkLoad(ChunkLoadEvent event) {
-		// Scan old chunks async for protect blocks
-		if (!event.isNewChunk()) {
-			this.bot.getServer().getScheduler().runTaskAsynchronously(this.bot.getPlugin(), new Runnable() {
-				public void run() {
-					scanChunk(event.getChunk());
-				}
-			});
-		}
-	}
-
-	@EventHandler
-	public void onChunkUnload(ChunkUnloadEvent event) {
-		// Keep protection blocks of unloaded chunks in memory
-	}
-
-	@EventHandler
 	public void onBlockPlace(BlockPlaceEvent event) {
-		if (scanBlock(event.getBlock())) {
+		if (updateProtectionSource(event.getBlock().getLocation())) {
 			// Play activate sound
 			event.getBlock().getLocation().getWorld().playSound(
 	    	event.getBlock().getLocation(),
@@ -207,7 +195,7 @@ public class ProtectSkill extends Skill implements Listener, CommandSkill
 
 	@EventHandler
 	public void onBlockBreak(BlockBreakEvent event) {
-		if (removeBlock(event.getBlock())) {
+		if (updateProtectionSource(event.getBlock().getLocation())) {
 			// Play deactivate sound
 			event.getBlock().getLocation().getWorld().playSound(
 	    	event.getBlock().getLocation(),
@@ -225,7 +213,7 @@ public class ProtectSkill extends Skill implements Listener, CommandSkill
 
 	@Override
 	public boolean execute(Player player, String[] args) {
-		Location protectLocation = getProtectLocationNear(player.getLocation());
+		Location protectLocation = getProtectionSourceNear(player.getLocation());
 		if (protectLocation != null) {
 			this.bot.getVoiceManager().whisper(
 	      player,
